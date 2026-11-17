@@ -1,0 +1,23 @@
+{
+  "name": "xhs-teardown",
+  "displayName": "爆款小红书笔记拆解",
+  "version": "0.3.6",
+  "entry": "SKILL.md",
+  "outputs": [
+    "pdf",
+    "md"
+  ],
+  "platforms": [
+    "macOS",
+    "Linux",
+    "Windows",
+    "WSL"
+  ],
+  "requires": {
+    "apiKey": "sk_... / dk_...（数据站 API 密钥）",
+    "browser": "Chrome / Edge / Chromium / Brave（仅 PDF 需要）",
+    "font": "中文字体（PingFang / Microsoft YaHei / Noto Sans CJK）",
+    "network": true
+  },
+  "description": "爆款小红书笔记拆解：给一条笔记链接，产出 7–8 页 A4 分析报告（PDF / Markdown）"
+}

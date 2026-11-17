@@ -1,0 +1,10 @@
+# 本地配置（含 API Key，绝不提交）
+config.json
+# 生成的报告与素材
+*.pdf
+data/
+reports/
+# 系统/缓存
+.DS_Store
+__pycache__/
+*.pyc

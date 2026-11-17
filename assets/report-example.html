@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>单篇笔记分析报告</title>
+<style>
+/* ============================================================
+   A4 报告模板（单篇笔记分析 · 含图表）
+   用法：复制到笔记数据目录（与 cover.png / frame_*.jpg 同级），
+        替换全部内容与图表数值，用 Chrome 打印为 PDF。
+   原则：所有数字来自真实取数；图表下方标注样本量；不虚构坐标轴。
+   ============================================================ */
+:root{
+  --ink:#191714; --paper:#FBF8F1; --sand:#EFE7D8;
+  --muted:#8C8478; --line:#E0D8C9;
+  --red:#B4472F; --green:#2E5A4C; --gold:#B08A4F;
+  --serif:"Songti SC","Noto Serif CJK SC","Source Han Serif SC","STSong",serif;
+  --sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#fff}
+body{font-family:var(--sans);font-size:9.8pt;line-height:1.75;color:var(--ink);
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+@page{size:A4;margin:16mm 15mm 14mm}
+
+/* ---------- 封面 ---------- */
+.cover{height:267mm;background:var(--ink);color:var(--paper);padding:15mm 14mm 11mm;
+  display:flex;flex-direction:column;break-after:page}
+.cover-top{display:flex;justify-content:space-between;align-items:baseline}
+.kicker{font-size:7.2pt;letter-spacing:.24em;color:#BFB3A0;text-transform:uppercase}
+.cover-top .date{font-size:7.2pt;letter-spacing:.14em;color:#8F8270}
+.cover-main{display:flex;gap:10mm;margin-top:9mm;flex:1;min-height:0}
+.cover-copy{flex:1;min-width:0;display:flex;flex-direction:column}
+.cover-title{font-family:var(--serif);font-size:21pt;line-height:1.58;margin:5mm 0 0;font-weight:600}
+.cover-sub{font-size:8.6pt;line-height:1.85;color:#CFC4B1;margin-top:4mm;letter-spacing:.02em}
+.cover-stats{display:grid;grid-template-columns:1fr 1fr;gap:4.5mm 6mm;margin-top:10mm;max-width:82mm}
+.cover-stats div{border-top:.5pt solid #4B4238;padding-top:2mm}
+.cover-stats b{font-family:var(--serif);font-size:14pt;display:block;line-height:1.2;color:#F3EADA}
+.cover-stats span{font-size:6.8pt;color:#9E9180;letter-spacing:.06em}
+.cover-art{width:88mm;flex:0 0 auto;margin:0}
+.cover-art img{width:88mm;height:117.3mm;object-fit:cover;display:block;border:.4pt solid #3B342B}
+.cover-art figcaption{font-size:6.8pt;line-height:1.6;color:#A99C88;margin-top:2.4mm}
+.cover-verdict{margin-top:9mm;border-top:.5pt solid #4B4238;padding-top:4mm}
+.cover-pull{margin-top:8mm;padding-top:4mm;border-top:.5pt solid #3B342B;font-family:var(--serif);font-size:10pt;line-height:1.9;color:#C9BFAE;display:flex;justify-content:space-between;align-items:baseline;gap:8mm}
+.cover-pull span{font-family:var(--sans);font-size:7pt;color:#8F8270;white-space:nowrap}
+.cover-toc{margin-top:auto;padding-top:4mm;font-size:6.9pt;letter-spacing:.1em;color:#8F8270;line-height:2}
+.cover-toc b{color:#C9BFAE;font-weight:600;margin-right:1.2mm}
+.badge{display:inline-block;background:var(--red);color:#fff;font-size:8.2pt;padding:1.5mm 4mm;letter-spacing:.04em}
+.cover-verdict p{font-size:7.6pt;line-height:1.7;color:#B7AB98;margin:2.6mm 0 0}
+.cover-meta{display:flex;justify-content:space-between;font-size:7.8pt;color:#BFB3A0;
+  margin-top:3.5mm;padding-top:3mm;border-top:.4pt solid #3B342B}
+.cover-meta b{color:#F3EADA;font-weight:600}
+.cover-foot{display:flex;justify-content:space-between;font-size:7pt;color:#7E7263;
+  letter-spacing:.04em;margin-top:4mm}
+
+/* ---------- 章节 ---------- */
+.section{break-before:page}
+.sec-head{display:flex;align-items:baseline;gap:5mm;border-bottom:1pt solid var(--ink);
+  padding-bottom:2.6mm;margin:0 0 6mm}
+.sec-num{font-family:var(--serif);font-size:10.5pt;color:var(--red);letter-spacing:.12em}
+.sec-title{font-family:var(--serif);font-size:19pt;margin:0;font-weight:600;letter-spacing:.02em}
+.sec-en{margin-left:auto;font-size:7pt;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+.lede{font-family:var(--serif);font-size:13.4pt;line-height:1.95;margin:0 0 5mm}
+.lede b{color:var(--red);font-weight:600}
+
+/* ---------- KPI ---------- */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm 4mm;margin:5mm 0 4mm}
+.kpi{border-top:1.1pt solid var(--ink);padding-top:2.4mm}
+.kpi .n{font-family:var(--serif);font-size:20pt;line-height:1.25}
+.kpi .l{font-size:7.6pt;color:var(--muted);letter-spacing:.05em;margin-top:.6mm}
+.kpi.accent .n{color:var(--red)}
+
+/* ---------- 读数 ---------- */
+.readout{display:grid;grid-template-columns:repeat(3,1fr);gap:5mm;margin:5mm 0 1mm}
+.readout div{border-top:.6pt solid var(--line);padding-top:3mm}
+.readout b{font-family:var(--serif);font-size:14pt;color:var(--red);display:block;line-height:1.3}
+.readout span{font-size:8pt;color:#4A453C;line-height:1.7}
+
+/* ---------- 图表卡 ---------- */
+.chart{border:.6pt solid var(--line);background:var(--paper);padding:6mm 6.5mm;margin:5mm 0;break-inside:avoid}
+.chart-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4.5mm}
+.chart-t{font-size:9.4pt;font-weight:600;letter-spacing:.02em}
+.chart-n{font-size:7.4pt;color:var(--muted)}
+.chart-src{margin-top:3.5mm;padding-top:2mm;border-top:.4pt dotted var(--line);font-size:7.2pt;color:var(--muted)}
+
+/* 条形 */
+.bars{display:flex;flex-direction:column;gap:3.2mm}
+.bar-row{display:grid;grid-template-columns:24mm 1fr 19mm;align-items:center;gap:3mm;font-size:8.4pt}
+.bar-track{height:4mm;background:var(--sand)}
+.bar-fill{height:100%;background:var(--green)}
+.bar-row.hl .bar-fill{background:var(--red)}
+.bar-val{text-align:right;font-family:var(--serif);font-size:9.6pt}
+
+/* 环形 */
+.donut-wrap{display:flex;align-items:center;gap:11mm}
+.donut{position:relative;width:50mm;height:50mm;flex:0 0 auto}
+.donut svg{width:100%;height:100%;display:block}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut-center .n{font-family:var(--serif);font-size:17pt;line-height:1.1}
+.donut-center .l{font-size:7pt;color:var(--muted);letter-spacing:.06em}
+.legend{display:flex;flex-direction:column;gap:2.6mm;font-size:8.4pt;flex:0 0 62mm}
+.legend div{display:flex;align-items:center}
+.legend i{width:2.8mm;height:2.8mm;display:inline-block;margin-right:2.4mm;flex:0 0 auto}
+.legend b{margin-left:auto;font-family:var(--serif);font-weight:600;padding-left:4mm}
+
+/* 时间轴 */
+.tl-bar{display:flex;height:9mm;overflow:hidden;border-radius:.8mm}
+.tl-seg{display:flex;align-items:center;justify-content:center;color:#fff;font-size:6.8pt;
+  letter-spacing:.02em;white-space:nowrap;overflow:hidden}
+.tl-seg.hook{background:var(--ink)}
+.tl-seg.story{background:#5E7F74}
+.tl-seg.content{background:var(--green)}
+.tl-seg.product{background:var(--red)}
+.tl-seg.cta{background:var(--gold)}
+.tl-legend{display:grid;grid-template-columns:repeat(3,1fr);gap:2.2mm 5mm;margin-top:4.5mm;font-size:8pt}
+.tl-legend div{border-top:.4pt solid var(--line);padding-top:1.8mm}
+.tl-legend .t{color:var(--muted);font-size:7.2pt}
+.tl-legend .v{font-weight:600}
+
+/* 引用 */
+.quote{border-left:2pt solid var(--red);padding:1.4mm 0 1.4mm 5mm;margin:4.2mm 0;break-inside:avoid}
+.quote p{font-family:var(--serif);font-size:11pt;line-height:1.85;margin:0}
+.quote .meta{font-size:7.2pt;color:var(--muted);margin-top:1.5mm;letter-spacing:.04em}
+
+/* 图片 */
+.figs{display:grid;grid-template-columns:1fr 1fr;gap:5mm;margin:4mm 0}
+.fig{margin:0;break-inside:avoid}
+.fig img{width:100%;display:block;border:.4pt solid var(--line)}
+.fig figcaption{font-size:7.2pt;color:var(--muted);margin-top:2mm;line-height:1.6}
+
+/* 归因 */
+.reasons{display:grid;grid-template-columns:1fr 1fr;gap:5mm 7mm;margin-top:2mm}
+.reason{border-top:.8pt solid var(--line);padding-top:2.8mm;break-inside:avoid}
+.reason h4{margin:0 0 1.6mm;font-size:9.6pt;letter-spacing:.02em}
+.reason p{margin:0;font-size:8.6pt;line-height:1.7;color:#3B372F}
+.pill{display:inline-block;font-size:6.6pt;padding:.3mm 1.8mm;border:.45pt solid currentColor;
+  border-radius:8mm;margin-left:2mm;vertical-align:1.5px;letter-spacing:.06em}
+.pill.high{color:var(--red)} .pill.mid{color:var(--gold)} .pill.low{color:var(--muted)}
+
+/* 表格 */
+table{width:100%;border-collapse:collapse;font-size:8.5pt;line-height:1.65}
+th{text-align:left;font-weight:600;border-bottom:1pt solid var(--ink);padding:2.4mm 2mm}
+td{border-bottom:.4pt solid var(--line);padding:2.4mm 2mm;vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.k{font-weight:600;white-space:nowrap}
+
+/* 提示框 */
+.callout{background:var(--sand);border-left:2.6pt solid var(--ink);padding:4.4mm 6mm;margin:5mm 0;break-inside:avoid}
+.callout .t{font-size:7.4pt;letter-spacing:.14em;color:var(--muted);margin-bottom:1.6mm}
+.callout p{margin:0;font-size:9.2pt;line-height:1.75}
+
+.two-col{columns:2;column-gap:8mm;font-size:8.6pt;line-height:1.9}
+.two-col p{margin:0 0 1.2mm;break-inside:avoid}
+.small{font-size:7.6pt;color:var(--muted);line-height:1.7}
+.disclaimer{margin-top:6mm;padding-top:3mm;border-top:.5pt solid var(--line);font-size:7pt;line-height:1.75;color:var(--muted)}
+.section.last{display:flex;flex-direction:column;min-height:262mm}
+.section.last .disclaimer{margin-top:auto}
+.disclaimer b{color:#6B6459;font-weight:600;letter-spacing:.08em}
+ul.clean{margin:0;padding-left:4mm}
+ul.clean li{margin:1.2mm 0;font-size:8.7pt}
+</style>
+</head>
+<body>
+
+<!-- ============ 封面 ============ -->
+<div class="cover">
+  <div class="cover-top">
+    <span class="kicker">Single-Note Analysis / 单篇笔记分析</span>
+    <span class="date">2026-11-17</span>
+  </div>
+
+  <div class="cover-main">
+    <div class="cover-copy">
+      <h1 class="cover-title">示例人物<br>是怎么在豪门<br>带娃的？</h1>
+      <div class="cover-sub">147 秒名人故事 + 19 秒产品口播<br>一条「流量合格、品牌失焦」的商单</div>
+
+      <div class="cover-stats">
+        <div><b>2,562</b><span>点赞 · 3.2× 中位</span></div>
+        <div><b>471</b><span>收藏 · 18.4%</span></div>
+        <div><b>19</b><span>评论 · 0.74%</span></div>
+        <div><b>15,660</b><span>作者粉丝</span></div>
+      </div>
+
+      <div class="cover-verdict">
+        <span class="badge">结论：流量合格，品牌承接失败</span>
+        <p>封面「投胎模版」+ 红毯照带来点击，却把「看豪门」的人带到了「买被子」的货架前。</p>
+      </div>
+
+      <div class="cover-toc"><b>01</b> 结论　<b>02</b> 结构　<b>03</b> 画面　<b>04</b> 评论<br><b>05</b> 归因　<b>06</b> 复刻　<b>07</b> 说明</div>
+
+    </div>
+
+    <figure class="cover-art">
+      <!-- 笔记封面：放在本文件同目录，命名为 cover.png -->
+      <img src="placeholder.svg" alt="笔记封面">
+      <figcaption>原笔记封面：23 岁贵族千金 / 嫁示例集团太子 / 生娃都像拍电影</figcaption>
+    </figure>
+  </div>
+
+  <div class="cover-pull">「豪宅是给别人看的风景，被窝才是每天真正属于自己的生活。」<span>—— 原笔记收尾旁白</span></div>
+
+  <div class="cover-meta">
+    <span>作者 <b>林小满</b>　粉丝 <b>15,660</b>　发布 <b>2026-10-20</b></span>
+    <span>样本 <b>13 条评论</b> · 视频 <b>147s</b></span>
+  </div>
+  <div class="cover-foot">
+    <span>数据站 · 单篇笔记分析 · 内容来自公开信息</span>
+    <span>视频 147s｜评论 13 条（全部）</span>
+  </div>
+</div>
+
+<!-- ============ 01 结论 ============ -->
+<section class="section">
+  <div class="sec-head"><span class="sec-num">01</span><h2 class="sec-title">核心结论</h2><span class="sec-en">Verdict</span></div>
+
+  <p class="lede">
+    这条笔记用「投胎模版」式的豪门窥私做钩子，<b>前 100 秒讲名人，最后 19 秒卖被子</b>。
+    它拿到了账号中上水平的流量，却没有把流量交给品牌：评论区 13 条里 8 条在聊贫富，只有 2 条提到产品。
+  </p>
+
+  <div class="kpis">
+    <div class="kpi accent"><div class="n">2,562</div><div class="l">点赞</div></div>
+    <div class="kpi"><div class="n">471</div><div class="l">收藏 · 18.4%</div></div>
+    <div class="kpi"><div class="n">19</div><div class="l">评论 · 0.74%</div></div>
+    <div class="kpi"><div class="n">40</div><div class="l">转发 · 1.56%</div></div>
+    <div class="kpi"><div class="n">15,660</div><div class="l">作者粉丝</div></div>
+    <div class="kpi"><div class="n">16.4%</div><div class="l">赞粉比</div></div>
+    <div class="kpi accent"><div class="n">3.2×</div><div class="l">近 22 篇中位赞</div></div>
+    <div class="kpi"><div class="n">7 / 22</div><div class="l">账号内排名</div></div>
+  </div>
+
+  <div class="chart">
+    <div class="chart-h"><span class="chart-t">本篇 vs 账号基线</span><span class="chart-n">单位：点赞</span></div>
+    <div class="bars">
+      <div class="bar-row hl"><span>本篇</span><div class="bar-track"><div class="bar-fill" style="width:76%"></div></div><span class="bar-val">2,562</span></div>
+      <div class="bar-row"><span>近 22 篇中位</span><div class="bar-track"><div class="bar-fill" style="width:23.5%"></div></div><span class="bar-val">793</span></div>
+      <div class="bar-row"><span>近 22 篇均值</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="bar-val">3,369</span></div>
+    </div>
+    <div class="chart-src">数据：作者主页近 22 篇笔记点赞；本篇 3.2× 中位、0.76× 均值，属于「中上，非爆款」。</div>
+  </div>
+
+  <div class="readout">
+    <div><b>16.4%</b><span>赞粉比正常偏上：内容有破圈，但主要仍在粉丝盘内扩散。</span></div>
+    <div><b>18.4%</b><span>收藏率高于评论率：用户「想拥有」多于「想讨论」。</span></div>
+    <div><b>0.74%</b><span>评论率过低：没有争议设计，算法缺少二次扩散燃料。</span></div>
+  </div>
+
+  <div class="callout">
+    <div class="t">一句话诊断</div>
+    <p>钩子（名人 + 极端细节）是有效的，但<b>封面承诺</b>（豪门想象）与<b>产品承诺</b>（一床被子）错位；产品 71% 处才出现，评论区已被阶层情绪接管，转化路径缺失。</p>
+  </div>
+</section>
+
+<!-- ============ 02 结构 ============ -->
+<section class="section">
+  <div class="sec-head"><span class="sec-num">02</span><h2 class="sec-title">内容结构</h2><span class="sec-en">Structure · 147s</span></div>
+
+  <p class="lede">147 秒分六段：<b>钩子 4%｜名人事实 28%｜爱情线 12%｜转折 21%｜产品 23%｜收尾 12%</b>。产品在 1:31 才以画面出现，1:44 才被口播点名。</p>
+
+  <div class="chart">
+    <div class="chart-h"><span class="chart-t">视频节奏与产品位置</span><span class="chart-n">总时长 147s（字幕覆盖至 2:21）</span></div>
+    <div class="tl-bar">
+      <div class="tl-seg hook" style="width:3.5%"></div>
+      <div class="tl-seg story" style="width:27.7%">名人事实</div>
+      <div class="tl-seg content" style="width:12.1%">爱情线</div>
+      <div class="tl-seg content" style="width:21.3%">转折</div>
+      <div class="tl-seg product" style="width:22.7%">产品</div>
+      <div class="tl-seg cta" style="width:12.7%">收尾</div>
+    </div>
+    <div class="tl-legend">
+      <div><div class="t">0:00–0:05</div><div class="v">钩子</div></div>
+      <div><div class="t">0:05–0:44</div><div class="v">名人事实 / 家世</div></div>
+      <div><div class="t">0:44–1:01</div><div class="v">爱情线</div></div>
+      <div><div class="t">1:01–1:31</div><div class="v">转折：回到日常</div></div>
+      <div><div class="t">1:31–2:03</div><div class="v">产品（硬广 19s）</div></div>
+      <div><div class="t">2:03–2:21</div><div class="v">金句 + CTA</div></div>
+    </div>
+    <div class="chart-src">依据视频字幕与关键画面；产品口播起点 1:44（71% 处），硬广时长 19s。</div>
+  </div>
+
+  <table>
+    <thead><tr><th style="width:24mm">时间</th><th style="width:30mm">段落</th><th>做了什么</th></tr></thead>
+    <tbody>
+      <tr><td class="k">0:00–0:05</td><td>钩子</td><td>「最夸张的豪门带娃现场？答案是私人飞机」</td></tr>
+      <tr><td class="k">0:05–0:22</td><td>事实堆叠</td><td>私人飞机换尿布、红沙发喂奶、示例集团大公子、继母 示例人物</td></tr>
+      <tr><td class="k">0:22–0:44</td><td>家世背书</td><td>奥斯卡导演父亲、Dior 实习、名媛舞会、宫廷公寓</td></tr>
+      <tr><td class="k">0:44–1:01</td><td>爱情线</td><td>情人节公开 → 订婚 → 结婚生子 →「最好的朋友」</td></tr>
+      <tr><td class="k">1:01–1:31</td><td>转折</td><td>没有舞会与闪光灯，只有花园和婴儿；再贵的生活也要关灯躺下</td></tr>
+      <tr><td class="k">1:31–2:03</td><td>产品</td><td>示例品牌净绒被：46 道工序、95% 鹅绒、120 支、32 年、4000+ 酒店</td></tr>
+      <tr><td class="k">2:03–2:21</td><td>收尾</td><td>「豪宅是给别人看的风景，被窝才是自己的生活」；关注我</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <div class="t">结构判断</div>
+    <p>前 70% 没有给产品留任何线索（没有枕头、没有卧室、没有「睡」字），产品段的信任是<b>借</b>来的，不是<b>攒</b>来的——观众没有理由在 1:31 突然关心一床被子。</p>
+  </div>
+</section>
+
+<!-- ============ 03 画面 ============ -->
+<section class="section">
+  <div class="sec-head"><span class="sec-num">03</span><h2 class="sec-title">画面与文案</h2><span class="sec-en">Visuals &amp; Copy</span></div>
+
+  <div class="figs">
+    <figure class="fig">
+      <img src="placeholder.svg" alt="前段：宫廷与名媛素材">
+      <figcaption><b>前 100 秒</b>：红毯 / 宫廷 / 名流拼贴，含第三方水印，暖金色调、强戏剧性。</figcaption>
+    </figure>
+    <figure class="fig">
+      <img src="placeholder.svg" alt="后段：普通卧室产品镜头">
+      <figcaption><b>后 40 秒</b>：普通卧室实拍，冷白调、无布景；与前半段像两支片子拼在一起。</figcaption>
+    </figure>
+  </div>
+
+  <div class="quote">
+    <p>「再华丽的宫殿也不可能每一刻都在举办舞会，再昂贵的生活也有卸下礼服关掉灯躺下睡觉的时候。」</p>
+    <div class="meta">1:13–1:19 旁白 · 全片唯一一次把「豪门」与「睡觉」接上</div>
+  </div>
+
+  <div class="quote">
+    <p>「我们总会关注它够不够蓬松，却很少去想和皮肤贴着这么久的东西究竟是怎么被清洁出来的。」</p>
+    <div class="meta">1:39–1:44 旁白 · 产品段唯一的「反常识钩子」，但只剩 19 秒</div>
+  </div>
+
+  <div class="callout">
+    <div class="t">视觉断裂</div>
+    <p>前段是「别人的生活」（红毯、宫廷、名人），后段是「我的卧室」（白墙、宜家床品）。<b>色温从暖金切到冷白</b>，观众在这一刻明确意识到「广告开始了」——这是完播率最可能掉头的点（推断，未取得后台留存曲线）。</p>
+  </div>
+</section>
+
+<!-- ============ 04 评论 ============ -->
+<section class="section">
+  <div class="sec-head"><span class="sec-num">04</span><h2 class="sec-title">评论区情报</h2><span class="sec-en">Comments · n=13</span></div>
+
+  <p class="lede">13 条一级评论里，<b>8 条在聊阶层与贫富</b>，只有 <b>2 条</b>提到产品；最高赞不是种草，而是「这条视频就是告诉我们多惨」。</p>
+
+  <div class="chart">
+    <div class="chart-h"><span class="chart-t">评论议题分布</span><span class="chart-n">13 条一级评论（全部）</span></div>
+    <div class="donut-wrap">
+      <div class="donut">
+        <svg viewBox="0 0 140 140" aria-label="评论议题分布">
+          <circle cx="70" cy="70" r="54" fill="none" stroke="#EFE7D8" stroke-width="17"/>
+          <circle cx="70" cy="70" r="54" fill="none" stroke="#B4472F" stroke-width="17"
+                  stroke-dasharray="210.4 339.3" stroke-dashoffset="0" transform="rotate(-90 70 70)"/>
+          <circle cx="70" cy="70" r="54" fill="none" stroke="#2E5A4C" stroke-width="17"
+                  stroke-dasharray="50.9 339.3" stroke-dashoffset="-210.4" transform="rotate(-90 70 70)"/>
+          <circle cx="70" cy="70" r="54" fill="none" stroke="#B08A4F" stroke-width="17"
+                  stroke-dasharray="78.0 339.3" stroke-dashoffset="-261.3" transform="rotate(-90 70 70)"/>
+        </svg>
+        <div class="donut-center"><div class="n">13</div><div class="l">条一级评论</div></div>
+      </div>
+      <div class="legend">
+        <div><i style="background:#B4472F"></i>阶层 / 贫富 / 仇富<b>8 · 62%</b></div>
+        <div><i style="background:#2E5A4C"></i>产品 / 种草<b>2 · 15%</b></div>
+        <div><i style="background:#B08A4F"></i>审美 / 其他<b>3 · 23%</b></div>
+      </div>
+    </div>
+    <div class="chart-src">逐条人工归类（13 条全部）；样本小，比例仅作方向参考，不宜外推。</div>
+  </div>
+
+  <div class="quote">
+    <p>「这条视频就是告诉我们多惨，形成对比」</p>
+    <div class="meta">最高赞 · 274 赞 · 3 条回复 · 观众把「豪门日常」读成了「阶层对比」</div>
+  </div>
+  <div class="quote">
+    <p>「没有媚富的义务」</p>
+    <div class="meta">138 赞 · 情绪直接指向内容立场，而非产品</div>
+  </div>
+  <div class="quote">
+    <p>「这叫门当户对产生了爱情罢了」</p>
+    <div class="meta">77 赞 · 把「爱情故事」降维成「阶层联姻」，是第二条讨论主线</div>
+  </div>
+  <div class="quote">
+    <p>「被被子种草了，直接搜示例品牌净绒被吗」</p>
+    <div class="meta">2 赞 · 全片唯一点到产品的评论，且是「询问路径」——说明 CTA 没接住</div>
+  </div>
+
+  <div class="callout">
+    <div class="t">评论区共识 / 分歧 / 缺口</div>
+    <p><b>共识</b>：这是一场「阶层对比」，不是「生活美学」。<b>分歧</b>：爱情还是门当户对。<b>缺口</b>：几乎没人讨论产品本身，品牌没有进入议题。</p>
+  </div>
+</section>
+
+<!-- ============ 05 归因 ============ -->
+<section class="section">
+  <div class="sec-head"><span class="sec-num">05</span><h2 class="sec-title">爆款归因</h2><span class="sec-en">Why it worked / failed</span></div>
+
+  <p class="lede">它拿到了 <b>3.2× 中位</b> 的流量，但没成为账号爆款（第 7/22）。起量与失效，是两套不同的原因。</p>
+
+  <h3 style="font-size:9pt;letter-spacing:.14em;color:var(--muted);margin:3mm 0 1mm">A · 起量的原因</h3>
+  <div class="reasons">
+    <div class="reason"><h4>封面「投胎模版」+ 红毯照<span class="pill mid">中</span></h4>
+      <p>身份反差 + 窥私欲，「23 岁 / 太子 / 生娃像拍电影」把点击理由压缩到 3 行。</p></div>
+    <div class="reason"><h4>5 秒内给出极端具体画面<span class="pill high">高</span></h4>
+      <p>「私人飞机上换尿布」比「豪门生活」具体一百倍，是可复述、可转述的社交货币。</p></div>
+    <div class="reason"><h4>故事线完整，能撑住 147 秒<span class="pill mid">中</span></h4>
+      <p>出生 → 家世 → 爱情 → 日常，四段都有信息增量，不靠空镜拖时长。</p></div>
+    <div class="reason"><h4>账号人设匹配<span class="pill mid">中</span></h4>
+      <p>30+ 女性成长、生活美学，15,660 粉的基本盘本就消费「别人的生活」。</p></div>
+  </div>
+
+  <h3 style="font-size:9pt;letter-spacing:.14em;color:var(--muted);margin:7mm 0 1mm">B · 失效的原因</h3>
+  <div class="reasons">
+    <div class="reason"><h4>人群错配<span class="pill high">高</span></h4>
+      <p>封面吸引「看豪门」的人，产品要「买被子」的人；前者贡献点击，后者才贡献转化。</p></div>
+    <div class="reason"><h4>评论区被阶层情绪劫持<span class="pill high">高</span></h4>
+      <p>8/13 条在聊贫富，最高赞 274 是「告诉我们多惨」，品牌信息被淹没。</p></div>
+    <div class="reason"><h4>产品晚 + 视觉断裂<span class="pill high">高</span></h4>
+      <p>1:31 才进产品，宫廷红毯切普通卧室，观众认知从「看故事」切到「看广告」。</p></div>
+    <div class="reason"><h4>卖点堆砌、没有演示<span class="pill mid">中</span></h4>
+      <p>19 秒念完 46 道工序 / 95% 鹅绒 / 120 支 / 32 年 / 4000 家酒店，无按压、无水洗对比。</p></div>
+    <div class="reason"><h4>CTA 错位<span class="pill high">高</span></h4>
+      <p>结尾是「关注我」，不是搜索词或商品组件；「直接搜吗」的评论就是证据。</p></div>
+    <div class="reason"><h4>评论量过低<span class="pill mid">中</span></h4>
+      <p>19 条评论、0.74% 评论率，缺少二次扩散燃料。</p></div>
+  </div>
+
+  <div class="callout">
+    <div class="t">反事实 / 可能不是原因</div>
+    <p>若把「被子不干净 / 不暖」前置到 0–10 秒，再讲「4000 家酒店同款」，产品记忆会强得多。<br>
+    粉丝基数、发布时段、视频长度都不是原因——账号 29,873 赞的《完美母亲》同样长视频、同一时段。</p>
+  </div>
+
+  <h3 style="font-size:9pt;letter-spacing:.14em;color:var(--muted);margin:5mm 0 1mm">怎么验证这些归因</h3>
+  <ul class="clean">
+    <li>同素材做两版 A/B：产品前置 vs 原版，看完播率与商品点击率；</li>
+    <li>统计评论关键词：品牌词、价格词、「搜 / 链接」类提问占比；</li>
+    <li>看 1:31 处的留存曲线是否断崖——若是，视觉断裂成立；若平滑，则归因需下调。</li>
+  </ul>
+</section>
+
+<!-- ============ 06 复刻 ============ -->
+<section class="section">
+  <div class="sec-head"><span class="sec-num">06</span><h2 class="sec-title">复刻建议</h2><span class="sec-en">Replication</span></div>
+
+  <p class="lede">可复用度 <b>76 / 100</b>：结构强、素材门槛高（名人素材有版权风险）、人设依赖中等、时效中等。要流量和要带货，是两套改法。</p>
+
+  <table>
+    <thead><tr><th style="width:14mm">方案</th><th style="width:36mm">目标</th><th>怎么改</th></tr></thead>
+    <tbody>
+      <tr><td class="k">A</td><td>只要流量</td><td>保留「极端钩子 → 名人事实 → 反差 → 金句」，换名人/换场景；但不要接人群不匹配的商单——本条就是反例。</td></tr>
+      <tr><td class="k">B</td><td>要带货（推荐）</td><td>产品前置：0–3s 痛点 → 3–15s 反常识（酒店看的是「干净」不是「蓬松」）→ 15–35s 名人插叙 → 35–95s 演示 → 95–120s 参数价格 → CTA。</td></tr>
+      <tr><td class="k">C</td><td>人设最稳</td><td>「30+ 女性的睡眠投资」：讲自己的卧室与换季，不讲豪门，弱化「投胎」叙事。</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="font-size:9pt;letter-spacing:.14em;color:var(--muted);margin:6mm 0 1mm">标题候选</h3>
+  <div class="two-col">
+    <p>1. 4000 家高端酒店的同款被窝，到底贵在哪</p>
+    <p>2. 被子越蓬松越好？你可能一直买错了</p>
+    <p>3. 一晚贴 8 小时的被子，比护肤品更值得挑</p>
+    <p>4. 示例集团太子妃的豪门带娃，夸张的不是私人飞机</p>
+    <p>5. 豪门也逃不过的那件事，被这条视频拍明白了</p>
+    <p>6. 为什么高端酒店的白被子，盖起来不一样</p>
+    <p>7. 豪宅是给别人看的，被窝才是自己的</p>
+    <p>8. 别再只看克重了，羽绒被的干净程度才是关键</p>
+  </div>
+
+  <h3 style="font-size:9pt;letter-spacing:.14em;color:var(--muted);margin:6mm 0 1mm">7 天验证指标</h3>
+  <table>
+    <thead><tr><th style="width:34mm">指标</th><th style="width:24mm">判定线</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td class="k">完播率</td><td>&gt; 35%</td><td>147s 长视频的及格线</td></tr>
+      <tr><td class="k">商品点击率</td><td>&gt; 2%</td><td>带货版必须看，本条缺失</td></tr>
+      <tr><td class="k">评论产品提及率</td><td>&gt; 20%</td><td>本条仅 15%，且是疑问句</td></tr>
+      <tr><td class="k">收藏 / 赞</td><td>&gt; 0.2</td><td>本条 0.184，接近及格</td></tr>
+      <tr><td class="k">搜索词增长</td><td>有</td><td>「示例品牌净绒被」是否起量</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <div class="t">不可复刻 / 风险</div>
+    <p>名人红毯与街拍素材（含第三方水印）有肖像权与著作权风险；婴儿镜头涉及未成年人隐私；「投胎模版」叙事易引发仇富与举报；商单需平台报备，参数类表述需有依据。</p>
+  </div>
+</section>
+
+<!-- ============ 07 说明 ============ -->
+<section class="section last">
+  <div class="sec-head"><span class="sec-num">07</span><h2 class="sec-title">说明</h2><span class="sec-en">Notes</span></div>
+
+  <table>
+    <thead><tr><th style="width:30mm">项</th><th>内容</th></tr></thead>
+    <tbody>
+      <tr><td class="k">笔记</td><td>《示例标题：一条关于生活方式的视频》· 林小满 · 2026-10-20 发布</td></tr>
+      <tr><td class="k">形式</td><td>竖屏视频，147 秒，中文口播 + 中英文字幕</td></tr>
+      <tr><td class="k">样本</td><td>13 条一级评论（全部）+ 5 条回复；封面与 3 张关键画面</td></tr>
+      <tr><td class="k">口径</td><td>点赞 / 收藏 / 评论 / 转发；账号基线取近 22 篇笔记</td></tr>
+      <tr><td class="k">局限</td><td>字幕为视频音频识别生成，可能存在个别错字，请以画面文字为准。</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="font-size:9pt;letter-spacing:.14em;color:var(--muted);margin:6mm 0 1mm">主要评论</h3>
+  <table>
+    <thead><tr><th>原话</th><th style="width:16mm">赞</th><th style="width:16mm">回复</th></tr></thead>
+    <tbody>
+      <tr><td>这条视频就是告诉我们多惨，形成对比</td><td>274</td><td>3</td></tr>
+      <tr><td>没有媚富的义务</td><td>138</td><td>0</td></tr>
+      <tr><td>这叫门当户对产生了爱情罢了</td><td>77</td><td>0</td></tr>
+      <tr><td>外国人有钱，我就老是觉得他们都是吸着我们先辈祖先们的血发的家</td><td>53</td><td>1</td></tr>
+      <tr><td>被被子种草了，直接搜示例品牌净绒被吗</td><td>2</td><td>1</td></tr>
+    </tbody>
+  </table>
+
+  <p class="disclaimer"><b>免责声明</b>　本报告所有内容均来自公开信息（笔记正文、公开评论、公开字幕与公开页面），仅用于内容分析与研究参考，不构成任何商业、消费或投资建议；引用观点不代表本报告立场。数据与平台规则可能随时变化，请以官方最新信息为准。</p>
+</section>
+
+</body>
+</html>

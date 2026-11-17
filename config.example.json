@@ -1,0 +1,14 @@
+{
+  "baseUrl": "https://creatordata.vip",
+  "apiKey": "sk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "defaults": {
+    "goal": "涨粉",
+    "format": "both",
+    "depth": "standard",
+    "footer": "数据站 · 单篇笔记分析 · 内容来自公开信息"
+  },
+  "pdf": {
+    "pageNumbers": true,
+    "virtualTimeBudgetMs": 5000
+  }
+}
